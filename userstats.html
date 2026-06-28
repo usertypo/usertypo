@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>User Stats - Your Performance | usertypo_</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Inter:wght@400;500;600;700;900&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#00d0ff', 'primary-dark': '#0090b0', 'primary-light': '#33d9ff',
+                        background: '#121418', 'background-dark': '#0e1013',
+                        surface: '#1a1d23', 'surface-light': '#252932', error: '#ff3333',
+                    },
+                    fontFamily: { mono: ['"Roboto Mono"', 'monospace'], sans: ['Inter', 'sans-serif'] },
+                    keyframes: {
+                        blink: { '0%, 100%': { opacity: '1' }, '50%': { opacity: '0' } },
+                        'fade-in': { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+                        'fade-in-up': { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
+                    },
+                    animation: { blink: 'blink 1s step-end infinite', 'fade-in': 'fade-in 1s ease-out forwards', 'fade-in-up': 'fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards' }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        html::-webkit-scrollbar, body::-webkit-scrollbar { display: none !important; width: 0 !important; }
+        html, body { -ms-overflow-style: none !important; scrollbar-width: none !important; }
+
+        /* Responsive proportional scaling: 16px at 1227px viewport (14.5" laptop),
+           scales proportionally for all PC screens. All rem-based Tailwind values
+           (fonts, padding, gaps, widths, border-radius, max-width) auto-scale. */
+        html {
+            font-size: clamp(13px, 1.3032vw, 24px);
+        }
+
+        .glass-panel {
+            background: linear-gradient(145deg, rgba(26,29,35,0.4) 0%, rgba(26,29,35,0.2) 100%);
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(12px);
+        }
+        .glass-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            backdrop-filter: blur(4px);
+        }
+        .neon-border-glow { box-shadow: 0 0 15px rgba(0,208,255,0.1); }
+        .cyan-glow-text { text-shadow: 0 0 8px rgba(0,208,255,0.5); }
+        .menu-btn { transition: all 0.2s ease; outline: none !important; -webkit-tap-highlight-color: transparent; }
+        .menu-btn:focus, .menu-btn:active { outline: none !important; background: transparent; }
+        .menu-btn:hover { color: white !important; text-shadow: 0 0 10px rgba(255,255,255,0.7); }
+        .menu-btn.is-active { color: #00d0ff !important; text-shadow: 0 0 15px rgba(0,208,255,0.8); }
+        .slide-ease { transition-timing-function: cubic-bezier(0.16,1,0.3,1); }
+        .zen-element { transition: opacity 0.5s ease-in-out; }
+        .zen-hidden { opacity: 0 !important; pointer-events: none !important; transition: opacity 0.5s ease-in-out; }
+        .font-headline { font-family: 'Roboto Mono', monospace; }
+
+        /* Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ Premium Drag-and-Drop Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬ */
+
+        .sortable-card { position: relative; }
+
+        /* Source card stays visible, just dimmed Ã¢â‚¬â€ NEVER collapses */
+        .sortable-card.is-dragging {
+            opacity: 0.25 !important;
+            pointer-events: none !important;
+            transition: opacity 0.15s ease !important;
+        }
+
+        /* Glowing drop-target indicator (not the source!) */
+        .drag-placeholder {
+            border-radius: 12px;
+            border: 2px dashed rgba(0, 208, 255, 0.5);
+            background: rgba(0, 208, 255, 0.04);
+            box-shadow: inset 0 0 20px rgba(0, 208, 255, 0.06);
+            animation: ph-pulse 1.8s ease-in-out infinite;
+        }
+        @keyframes ph-pulse {
+            0%, 100% { border-color: rgba(0,208,255,0.35); }
+            50%       { border-color: rgba(0,208,255,0.7); box-shadow: inset 0 0 30px rgba(0,208,255,0.1); }
+        }
+
+        /* Floating drag clone Ã¢â‚¬â€ keeps the card's NATURAL look, just elevated */
+        .drag-clone {
+            position: fixed !important;
+            z-index: 9999 !important;
+            pointer-events: none !important;
+            border-radius: 12px !important;
+            overflow: hidden !important;
+            /* Elevated depth shadow + subtle cyan border Ã¢â‚¬â€ no background override */
+            box-shadow:
+                0 22px 65px rgba(0,0,0,0.65),
+                0 0 0 1px rgba(0,208,255,0.32),
+                0 0 38px rgba(0,208,255,0.13) !important;
+            border: 1px solid rgba(0, 208, 255, 0.32) !important;
+            /* Tiny lift scale only */
+            transform: scale(1.02) !important;
+            opacity: 0.97 !important;
+            will-change: left, top !important;
+        }
+
+        /* Drag handle */
+        .drag-handle {
+            cursor: grab;
+            opacity: 0;
+            transition: opacity 0.18s ease;
+            display: flex;
+            align-items: center;
+        }
+        .sortable-card:hover .drag-handle { opacity: 0.55; }
+        .drag-handle:hover { opacity: 1 !important; }
+        .drag-handle:active { cursor: grabbing; }
+        .card-static .drag-handle { display: none !important; }
+        /* Header Logo */
+        .header-logo-link { display: flex; align-items: center; justify-content: center; height: 48px; width: 180px; }
+        .header-logo-container { position: relative; width: 500px; height: 500px; transform: scale(0.5); margin: -250px; flex-shrink: 0; pointer-events: none; }
+        .header-logo-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .header-dynamic-layer { -webkit-mask-size: contain; mask-size: contain; -webkit-mask-repeat: no-repeat; -webkit-mask-position: center; opacity: 1; }
+        .header-typ-layer { background-color: #95efff; -webkit-mask-image: url('logo-assets/typ_.png'); mask-image: url('logo-assets/typ_.png'); }
+        .header-user-layer { background-color: #ffffff; -webkit-mask-image: url('logo-assets/user.png'); mask-image: url('logo-assets/user.png'); }
+        .header-static-layer { z-index: 3; object-fit: contain; pointer-events: none; animation: header-fade-o 1s ease-out 0s forwards; }
+        .header-typ-wrapper { z-index: 1; animation: header-fade-typ 1s ease-out 0s forwards; }
+        .header-user-wrapper { z-index: 2; animation: header-fade-user 1s ease-out 0s forwards; }
+        @keyframes header-fade-typ { 0% { filter: drop-shadow(0 0 0px rgba(128, 235, 255, 0)); } 100% { filter: drop-shadow(0 0 6px #95efff) drop-shadow(0 0 15px rgba(128, 235, 255, 0.55)); } }
+        @keyframes header-fade-user { 0% { filter: drop-shadow(0 0 0px rgba(255, 255, 255, 0)); } 100% { filter: drop-shadow(0 0 6px #ffffff) drop-shadow(0 0 15px rgba(255, 255, 255, 0.55)); } }
+        @keyframes header-fade-o { 0% { filter: drop-shadow(0 0 0px rgba(255, 51, 68, 0)); } 100% { filter: drop-shadow(0 0 6px #ff3344) drop-shadow(0 0 15px rgba(255, 51, 68, 0.55)); } }
+    </style>
+</head>
+
+<body class="bg-transparent text-slate-300 font-sans min-h-screen flex flex-col relative" id="app-body">
+
+    <!-- Background -->
+    <div class="fixed inset-0 z-0" style="background-color: #020016;"></div>
+
+    <!-- Page-level custom scrollbar (fixed, right edge) -->
+    <div id="page-scroll-track"
+        class="fixed top-2 bottom-2 right-1 w-1.5 z-[999] opacity-0 translate-x-4 transition-all duration-300 pointer-events-none">
+        <div id="page-scroll-thumb"
+            class="absolute top-0 right-0 w-full bg-primary/40 hover:bg-primary shadow-[0_0_10px_rgba(0,208,255,0.3)] backdrop-blur-md rounded-full cursor-pointer pointer-events-auto transition-colors duration-200">
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar-menu"
+        class="fixed top-0 left-0 h-[100dvh] w-[280px] z-[100] glass-panel rounded-r-3xl flex flex-col transform -translate-x-full transition-transform duration-500 slide-ease border-l-0 shadow-[20px_0_50px_rgba(0,0,0,0.5)] bg-surface/85 !backdrop-blur-sm">
+        <div class="p-6 pb-8">
+            <span class="material-symbols-outlined text-[24px] text-primary"
+                style="text-shadow: 0 0 10px rgba(0,208,255,0.6);">menu</span>
+        </div>
+        <nav class="flex-1 px-4 flex flex-col gap-2">
+            <a href="index.html"
+                class="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-all group">
+                <span
+                    class="material-symbols-outlined text-[22px] group-hover:text-primary group-hover:[text-shadow:0_0_10px_rgba(0,208,255,0.8)] transition-all">keyboard</span>
+                <span class="font-bold text-sm tracking-wide">Typing Test</span>
+            </a>
+            <a href="friends.html"
+                class="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-all group">
+                <span
+                    class="material-symbols-outlined text-[22px] group-hover:text-primary group-hover:[text-shadow:0_0_10px_rgba(0,208,255,0.8)] transition-all">group</span>
+                <span class="font-bold text-sm tracking-wide">Friends</span>
+            </a>
+            <a href="leaderboards.html"
+                class="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-all group">
+                <span
+                    class="material-symbols-outlined text-[22px] group-hover:text-primary group-hover:[text-shadow:0_0_10px_rgba(0,208,255,0.8)] transition-all">emoji_events</span>
+                <span class="font-bold text-sm tracking-wide">Leaderboards</span>
+            </a>
+            <a href="#"
+                class="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-all group">
+                <div class="relative flex items-center justify-center">
+                    <span
+                        class="material-symbols-outlined text-[22px] group-hover:text-primary group-hover:[text-shadow:0_0_10px_rgba(0,208,255,0.8)] transition-all">notifications</span>
+                    <span
+                        class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full shadow-[0_0_5px_rgba(239,68,68,0.8)] border border-surface"></span>
+                </div>
+                <span class="font-bold text-sm tracking-wide">Notifications</span>
+            </a>
+            <div class="h-px bg-white/10 w-full my-2"></div>
+            <a href="settings.html"
+                class="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-all group">
+                <span
+                    class="material-symbols-outlined text-[22px] group-hover:text-primary group-hover:[text-shadow:0_0_10px_rgba(0,208,255,0.8)] transition-all">settings</span>
+                <span class="font-bold text-sm tracking-wide">Settings</span>
+            </a>
+            <a href="#"
+                class="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-all group">
+                <span
+                    class="material-symbols-outlined text-[22px] group-hover:text-primary group-hover:[text-shadow:0_0_10px_rgba(0,208,255,0.8)] transition-all">info</span>
+                <span class="font-bold text-sm tracking-wide">About</span>
+            </a>
+        </nav>
+        <div class="p-4 pb-6">
+            <a href="userstats.html"
+                class="glass-card border border-white/5 bg-black/20 rounded-2xl p-3 flex items-center justify-between hover:bg-white/5 transition-all cursor-pointer group">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-background-dark font-black text-lg shadow-[0_0_15px_rgba(0,208,255,0.4)]">
+                        G</div>
+                    <div class="flex flex-col justify-center">
+                        <span class="text-white font-bold text-sm leading-tight">GAMER_42</span>
+                        <span class="text-primary text-[11px] font-bold tracking-wide">Pro Member</span>
+                    </div>
+                </div>
+                <button class="text-slate-500 group-hover:text-white transition-colors mr-1">
+                    <span class="material-symbols-outlined text-[20px]">logout</span>
+                </button>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Header -->
+    <header class="flex items-center justify-between px-6 py-4 bg-transparent shrink-0 relative z-20">
+        <div class="flex items-center gap-3 w-1/3 zen-element">
+            <button id="open-menu-btn"
+                class="menu-btn text-slate-400 hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] transition-all duration-300">
+                <span class="material-symbols-outlined text-[24px]">menu</span>
+            </button>
+        </div>
+                <div class="flex items-center justify-center w-1/3">
+            <a href="index.html" class="header-logo-link">
+                <div class="header-logo-container">
+                    <div class="header-logo-layer header-typ-wrapper">
+                        <div class="header-logo-layer header-dynamic-layer header-typ-layer"></div>
+                    </div>
+                    <div class="header-logo-layer header-user-wrapper">
+                        <div class="header-logo-layer header-dynamic-layer header-user-layer"></div>
+                    </div>
+                    <img src="logo-assets/o.png" class="header-logo-layer header-static-layer">
+                </div>
+            </a>
+        </div>
+        <div class="flex items-center justify-end w-1/3 gap-8 zen-element">
+            <a href="userstats.html"
+                class="flex items-center justify-center rounded-full bg-surface/40 border border-white/5 w-10 h-10 text-slate-300 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all font-bold backdrop-blur-md shadow-[0_4px_15px_rgba(0,0,0,0.2)] hover:shadow-[0_0_15px_rgba(0,208,255,0.25)] group">
+                <span
+                    class="material-symbols-outlined text-[18px] text-primary group-hover:text-white transition-colors">person</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 w-full max-w-7xl mx-auto px-6 pt-4 pb-8 relative z-10">
+        <!-- Hero Section -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center mb-16 min-h-[calc(100vh-10rem)]">
+            <!-- Left: Timed Bests -->
+            <div class="flex flex-col gap-4 order-2 lg:order-1">
+                <h3
+                    class="font-headline text-xs uppercase tracking-widest text-slate-500 mb-2 opacity-0 animate-fade-in-up [animation-delay:250ms]">
+                    Timed Bests</h3>
+                <div
+                    class="glass-panel p-6 rounded-lg neon-border-glow flex justify-between items-center group hover:bg-white/5 transition-colors opacity-0 animate-fade-in-up [animation-delay:300ms]">
+                    <div>
+                        <span class="font-headline text-slate-400 text-sm block">15 Seconds</span>
+                        <span class="font-headline text-4xl font-bold text-primary cyan-glow-text">142</span>
+                        <span class="text-xs text-primary ml-1">WPM</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-slate-500 text-xs block">Accuracy</span>
+                        <span class="font-headline text-xl text-slate-500">98.4%</span>
+                    </div>
+                </div>
+                <div
+                    class="glass-panel p-6 rounded-lg neon-border-glow flex justify-between items-center group hover:bg-white/5 transition-colors opacity-0 animate-fade-in-up [animation-delay:400ms]">
+                    <div>
+                        <span class="font-headline text-slate-400 text-sm block">30 Seconds</span>
+                        <span class="font-headline text-4xl font-bold text-primary cyan-glow-text">135</span>
+                        <span class="text-xs text-primary ml-1">WPM</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-slate-500 text-xs block">Accuracy</span>
+                        <span class="font-headline text-xl text-slate-500">97.2%</span>
+                    </div>
+                </div>
+                <div
+                    class="glass-panel p-6 rounded-lg neon-border-glow flex justify-between items-center group hover:bg-white/5 transition-colors opacity-0 animate-fade-in-up [animation-delay:500ms]">
+                    <div>
+                        <span class="font-headline text-slate-400 text-sm block">60 Seconds</span>
+                        <span class="font-headline text-4xl font-bold text-primary cyan-glow-text">128</span>
+                        <span class="text-xs text-primary ml-1">WPM</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-slate-500 text-xs block">Accuracy</span>
+                        <span class="font-headline text-xl text-slate-500">99.1%</span>
+                    </div>
+                </div>
+                <div
+                    class="glass-panel p-6 rounded-lg neon-border-glow flex justify-between items-center group hover:bg-white/5 transition-colors opacity-0 animate-fade-in-up [animation-delay:600ms]">
+                    <div>
+                        <span class="font-headline text-slate-400 text-sm block">120 Seconds</span>
+                        <span class="font-headline text-4xl font-bold text-primary cyan-glow-text">118</span>
+                        <span class="text-xs text-primary ml-1">WPM</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-slate-500 text-xs block">Accuracy</span>
+                        <span class="font-headline text-xl text-slate-500">97.8%</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Center: Profile & Global Stats -->
+            <div
+                class="flex flex-col items-center order-1 lg:order-2 opacity-0 animate-fade-in-up [animation-delay:100ms]">
+                <div class="relative w-40 h-40 mb-6">
+                    <div class="absolute inset-0 rounded-full border-4 border-white/10"></div>
+                    <div class="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-pulse"
+                        style="clip-path: inset(0 0 35% 0);"></div>
+                    <img alt="Portrait of a young male gamer" class="w-full h-full rounded-full object-cover p-2"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqGUrpEk6CoOt28wCB4xzeze8tEeIcf3CftmiuhheQB65aRRhE5EUFk6eLYgbC-wNIesokTOw5q6stmTVD5AeTTVX-nnYgCetp9k3vY9qQCkExeHtFLyPURkLiVg1NsTGIlNMnLBtYGnQxDXPzWuFpT6KSeTC8IBMb-zEoLboZ4aqItha6bV5wzkpXrFEBjI2vlPBnAfsPybkXURAwCTGbNS0cbC3foBakpwvWtzz9Lo959gxhLxZLjmz9wJJuOccWVNLFwBHLumcf" />
+                    <div
+                        class="absolute -bottom-2 bg-primary text-background-dark font-headline font-bold text-xs px-3 py-1 rounded-full shadow-lg">
+                        LVL 42</div>
+                </div>
+                <h1 class="font-headline text-3xl font-bold tracking-tight text-slate-100 mb-8">GAMER_42</h1>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full">
+                    <div class="glass-panel p-4 rounded-lg text-center relative group cursor-default transition-colors hover:bg-white/5">
+                        <span class="text-[10px] uppercase tracking-widest text-slate-500 block mb-1">Tests</span>
+                        <span class="font-headline text-lg font-semibold text-slate-100 truncate block">1.2k</span>
+                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-[#252932] border border-white/10 rounded shadow-xl text-xs font-headline text-white whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
+                            1,248 Tests Taken
+                            <div class="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-[#252932]"></div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-4 rounded-lg text-center relative group cursor-default transition-colors hover:bg-white/5">
+                        <span class="text-[10px] uppercase tracking-widest text-slate-500 block mb-1">Time</span>
+                        <span class="font-headline text-lg font-semibold text-slate-100 truncate block">42h</span>
+                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-[#252932] border border-white/10 rounded shadow-xl text-xs font-headline text-white whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
+                            42 Hours of Typing
+                            <div class="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-[#252932]"></div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-4 rounded-lg text-center relative group cursor-default transition-colors hover:bg-white/5">
+                        <span class="text-[10px] uppercase tracking-widest text-slate-500 block mb-1">Words</span>
+                        <span class="font-headline text-lg font-semibold text-slate-100 truncate block">84k</span>
+                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-[#252932] border border-white/10 rounded shadow-xl text-xs font-headline text-white whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
+                            84,200 Words Typed
+                            <div class="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-[#252932]"></div>
+                        </div>
+                    </div>
+                    <div class="glass-panel p-4 rounded-lg text-center relative group cursor-default transition-colors hover:bg-white/5">
+                        <span class="text-[10px] uppercase tracking-widest text-slate-500 block mb-1">Rank</span>
+                        <span class="font-headline text-lg font-semibold text-primary truncate block">#102</span>
+                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 bg-[#252932] border border-white/10 rounded shadow-xl text-xs font-headline text-white whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 z-50">
+                            Rank #102
+                            <div class="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-[#252932]"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Right: Word Bests -->
+            <div class="flex flex-col gap-4 order-3">
+                <h3
+                    class="font-headline text-xs uppercase tracking-widest text-slate-500 mb-2 opacity-0 animate-fade-in-up [animation-delay:250ms]">
+                    Word Bests</h3>
+                <div
+                    class="glass-panel p-6 rounded-lg neon-border-glow flex justify-between items-center group hover:bg-white/5 transition-colors opacity-0 animate-fade-in-up [animation-delay:300ms]">
+                    <div>
+                        <span class="font-headline text-slate-400 text-sm block">10 Words</span>
+                        <span class="font-headline text-4xl font-bold text-primary cyan-glow-text">168</span>
+                        <span class="text-xs text-primary ml-1">WPM</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-slate-500 text-xs block">Accuracy</span>
+                        <span class="font-headline text-xl text-slate-500">100%</span>
+                    </div>
+                </div>
+                <div
+                    class="glass-panel p-6 rounded-lg neon-border-glow flex justify-between items-center group hover:bg-white/5 transition-colors opacity-0 animate-fade-in-up [animation-delay:400ms]">
+                    <div>
+                        <span class="font-headline text-slate-400 text-sm block">25 Words</span>
+                        <span class="font-headline text-4xl font-bold text-primary cyan-glow-text">154</span>
+                        <span class="text-xs text-primary ml-1">WPM</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-slate-500 text-xs block">Accuracy</span>
+                        <span class="font-headline text-xl text-slate-500">99.2%</span>
+                    </div>
+                </div>
+                <div
+                    class="glass-panel p-6 rounded-lg neon-border-glow flex justify-between items-center group hover:bg-white/5 transition-colors opacity-0 animate-fade-in-up [animation-delay:500ms]">
+                    <div>
+                        <span class="font-headline text-slate-400 text-sm block">50 Words</span>
+                        <span class="font-headline text-4xl font-bold text-primary cyan-glow-text">147</span>
+                        <span class="text-xs text-primary ml-1">WPM</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-slate-500 text-xs block">Accuracy</span>
+                        <span class="font-headline text-xl text-slate-500">98.5%</span>
+                    </div>
+                </div>
+                <div
+                    class="glass-panel p-6 rounded-lg neon-border-glow flex justify-between items-center group hover:bg-white/5 transition-colors opacity-0 animate-fade-in-up [animation-delay:600ms]">
+                    <div>
+                        <span class="font-headline text-slate-400 text-sm block">100 Words</span>
+                        <span class="font-headline text-4xl font-bold text-primary cyan-glow-text">131</span>
+                        <span class="text-xs text-primary ml-1">WPM</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-slate-500 text-xs block">Accuracy</span>
+                        <span class="font-headline text-xl text-slate-500">97.4%</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Advanced Analytics Masonry-ish Grid -->
+        <section id="sortable-container"
+            class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-16 opacity-0 animate-fade-in-up [animation-delay:700ms]">
+            <!-- Top Graph Area: Performance Graph Full Width -->
+            <div class="col-span-12 glass-panel p-6 rounded-xl">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="font-headline text-lg font-bold">Performance Over Time</h2>
+                    <div class="flex gap-2">
+                        <button
+                            class="bg-surface px-3 py-1 rounded text-xs text-slate-500 hover:text-primary transition-colors">1W</button>
+                        <button class="bg-primary/20 px-3 py-1 rounded text-xs text-primary">1M</button>
+                        <button
+                            class="bg-surface px-3 py-1 rounded text-xs text-slate-500 hover:text-primary transition-colors">6M</button>
+                        <button
+                            class="bg-surface px-3 py-1 rounded text-xs text-slate-500 hover:text-primary transition-colors">ALL</button>
+                    </div>
+                </div>
+                <div class="h-64 flex items-end gap-1 overflow-hidden">
+                    <svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 800 200">
+                        <defs>
+                            <lineargradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+                                <stop offset="0%" stop-color="#6cdaff" stop-opacity="0.3"></stop>
+                                <stop offset="100%" stop-color="#6cdaff" stop-opacity="0"></stop>
+                            </lineargradient>
+                        </defs>
+                        <path
+                            d="M0,180 Q50,150 100,160 T200,120 T300,140 T400,90 T500,110 T600,70 T700,85 T800,50 L800,200 L0,200 Z"
+                            fill="url(#chartGradient)"></path>
+                        <path d="M0,180 Q50,150 100,160 T200,120 T300,140 T400,90 T500,110 T600,70 T700,85 T800,50"
+                            fill="none" stroke="#6cdaff" stroke-width="3"></path>
+                        <path d="M0,100 Q100,95 200,98 T400,92 T600,95 T800,90" fill="none" stroke="#aaabb0"
+                            stroke-dasharray="4" stroke-width="2"></path>
+                    </svg>
+                </div>
+                <div class="flex justify-between mt-4">
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-primary"></span>
+                            <span class="text-xs text-slate-400">WPM</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-outline"></span>
+                            <span class="text-xs text-slate-400">Accuracy</span>
+                        </div>
+                    </div>
+                    <span class="text-[10px] text-slate-500 font-headline uppercase tracking-widest">Live Data Stream
+                        Active</span>
+                </div>
+            </div>
+            <div class="col-span-12 glass-panel p-6 rounded-xl">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <h2 class="font-headline text-lg font-bold">Hand Biometrics &amp; Consistency</h2>
+                    <div class="bg-primary/10 border border-primary/30 px-3 py-1 rounded-full">
+                        <span class="text-xs font-headline font-bold text-primary tracking-tight">Hand Dominance Skew:
+                            Right +4%</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-8">
+                    <div class="flex justify-between border-r border-white/5 pr-6 md:pr-12">
+                        <div class="space-y-4">
+                            <div>
+                                <span class="text-[10px] uppercase tracking-widest text-slate-500 block mb-1">Left
+                                    Hand</span>
+                                <span class="font-headline text-3xl font-bold text-slate-100">108 <span
+                                        class="text-xs font-normal text-slate-500">WPM</span></span>
+                            </div>
+                            <div class="flex gap-8">
+                                <div>
+                                    <span class="text-[10px] text-slate-500 block">Accuracy</span>
+                                    <span class="font-headline text-slate-100">98.2%</span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500 block">Total Errors</span>
+                                    <span class="font-headline text-slate-100">12</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] uppercase tracking-widest text-slate-500 block mb-1">Slowest
+                                Finger</span>
+                            <span class="font-headline text-sm font-medium text-error">Left Pinky</span>
+                        </div>
+                    </div>
+                    <div class="flex justify-between">
+                        <div class="space-y-4">
+                            <div>
+                                <span class="text-[10px] uppercase tracking-widest text-slate-500 block mb-1">Right
+                                    Hand</span>
+                                <span class="font-headline text-3xl font-bold text-primary cyan-glow-text">116 <span
+                                        class="text-xs font-normal text-slate-500">WPM</span></span>
+                            </div>
+                            <div class="flex gap-8">
+                                <div>
+                                    <span class="text-[10px] text-slate-500 block">Accuracy</span>
+                                    <span class="font-headline text-slate-100">98.6%</span>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] text-slate-500 block">Total Errors</span>
+                                    <span class="font-headline text-slate-100">8</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] uppercase tracking-widest text-slate-500 block mb-1">Slowest
+                                Finger</span>
+                            <span class="font-headline text-sm font-medium text-error">Right Ring</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative w-full max-w-4xl mx-auto py-4">
+                    <div class="absolute left-1/2 top-0 bottom-0 w-px bg-white/10 z-0"></div>
+                    <div class="space-y-6 relative z-10">
+                        <div class="flex items-center gap-4">
+                            <div class="flex-1 flex justify-end">
+                                <div class="h-8 bg-[#475569] rounded-l flex items-center justify-end px-3 text-[10px] font-bold text-white transition-all"
+                                    style="width: 80%;">108 WPM</div>
+                            </div>
+                            <div class="w-32 text-center">
+                                <span class="text-[10px] uppercase tracking-widest text-slate-500 font-headline">Avg
+                                    Speed</span>
+                            </div>
+                            <div class="flex-1 flex justify-start">
+                                <div class="h-8 bg-[#00d0ff] rounded-r flex items-center justify-start px-3 text-[10px] font-bold text-background-dark transition-all"
+                                    style="width: 86%;">116 WPM</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="flex-1 flex justify-end">
+                                <div class="h-8 bg-[#475569]/60 rounded-l flex items-center justify-end px-3 text-[10px] font-bold text-white transition-all"
+                                    style="width: 98%;">98.2%</div>
+                            </div>
+                            <div class="w-32 text-center">
+                                <span
+                                    class="text-[10px] uppercase tracking-widest text-slate-500 font-headline">Accuracy</span>
+                            </div>
+                            <div class="flex-1 flex justify-start">
+                                <div class="h-8 bg-[#00d0ff]/60 rounded-r flex items-center justify-start px-3 text-[10px] font-bold text-background-dark transition-all"
+                                    style="width: 99%;">98.6%</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="flex-1 flex justify-end">
+                                <div class="h-8 bg-[#475569]/40 rounded-l flex items-center justify-end px-3 text-[10px] font-bold text-white transition-all"
+                                    style="width: 45%;">4.2 Hz</div>
+                            </div>
+                            <div class="w-32 text-center">
+                                <span
+                                    class="text-[10px] uppercase tracking-widest text-slate-500 font-headline">Frequency</span>
+                            </div>
+                            <div class="flex-1 flex justify-start">
+                                <div class="h-8 bg-[#00d0ff]/40 rounded-r flex items-center justify-start px-3 text-[10px] font-bold text-background-dark transition-all"
+                                    style="width: 55%;">5.1 Hz</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="flex-1 flex justify-end">
+                                <div class="h-8 bg-[#475569]/20 rounded-l flex items-center justify-end px-3 text-[10px] font-bold text-white transition-all"
+                                    style="width: 60%;">12</div>
+                            </div>
+                            <div class="w-32 text-center">
+                                <span class="text-[10px] uppercase tracking-widest text-slate-500 font-headline">Error
+                                    Vol.</span>
+                            </div>
+                            <div class="flex-1 flex justify-start">
+                                <div class="h-8 bg-[#00d0ff]/20 rounded-r flex items-center justify-start px-3 text-[10px] font-bold text-background-dark transition-all"
+                                    style="width: 40%;">8</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Error Diagnostics stays -->
+            <div class="col-span-12 glass-panel p-6 rounded-xl">
+                <h2 class="font-headline text-lg font-bold mb-6">Error Diagnostics &amp; Weakness Analysis</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="space-y-8">
+                        <h3 class="text-[10px] uppercase tracking-widest text-slate-500 font-headline mb-4">The
+                            Blacklist
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <span class="text-[10px] text-slate-500 block mb-1">Top 5 Missed Characters</span>
+                                <div class="flex items-baseline gap-3">
+                                    <span class="font-headline text-3xl font-bold text-primary cyan-glow-text">P</span>
+                                    <span class="text-slate-500 text-sm font-headline">Q, Z, X, B</span>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-500 block mb-2">Top 5 Slowest Bigrams</span>
+                                <div class="space-y-1">
+                                    <div class="flex justify-between text-xs font-headline">
+                                        <span class="text-slate-400">qu</span>
+                                        <span class="text-slate-500">42 WPM</span>
+                                    </div>
+                                    <div class="flex justify-between text-xs font-headline">
+                                        <span class="text-slate-400">ze</span>
+                                        <span class="text-slate-500">48 WPM</span>
+                                    </div>
+                                    <div class="flex justify-between text-xs font-headline">
+                                        <span class="text-slate-400">br</span>
+                                        <span class="text-slate-500">55 WPM</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-500 block mb-2">Top 5 Slowest Words</span>
+                                <div class="space-y-1">
+                                    <div class="flex justify-between text-xs font-headline">
+                                        <span class="text-slate-400">rhythm</span>
+                                        <span class="text-slate-500">62 WPM</span>
+                                    </div>
+                                    <div class="flex justify-between text-xs font-headline">
+                                        <span class="text-slate-400">queue</span>
+                                        <span class="text-slate-500">65 WPM</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <h3 class="text-[10px] uppercase tracking-widest text-slate-500 font-headline mb-6 self-start">
+                            Error Anatomy</h3>
+                        <div class="relative w-32 h-32 mb-6">
+                            <svg class="w-full h-full -rotate-90" viewbox="0 0 36 36">
+                                <circle cx="18" cy="18" fill="none" r="16" stroke="#46484c" stroke-dasharray="100 100"
+                                    stroke-width="4"></circle>
+                                <circle cx="18" cy="18" fill="none" r="16" stroke="#23262c" stroke-dasharray="25 100"
+                                    stroke-dashoffset="0" stroke-width="4"></circle>
+                                <circle cx="18" cy="18" fill="none" r="16" stroke="#6cdaff" stroke-dasharray="65 100"
+                                    stroke-dashoffset="-25" stroke-width="4"></circle>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-[10px] font-headline text-slate-500">TOTAL</span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 gap-2 w-full px-4">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-primary"></span>
+                                <span class="text-xs text-slate-400">Substitutions (65%)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-outline-variant"></span>
+                                <span class="text-xs text-slate-400">Omissions (25%)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-surface-light"></span>
+                                <span class="text-xs text-slate-400">Insertions (10%)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-8">
+                        <h3 class="text-[10px] uppercase tracking-widest text-slate-500 font-headline mb-4">Mechanical
+                            Friction</h3>
+                        <div class="space-y-6">
+                            <div>
+                                <span class="text-[10px] text-slate-500 block mb-2">Key Confusion</span>
+                                <div class="space-y-2">
+                                    <div class="bg-surface p-2 rounded text-[10px] font-headline border border-white/5">
+                                        <span class="text-slate-500">Expected</span> <span
+                                            class="text-slate-100 font-bold">S</span> <span
+                                            class="text-primary mx-2">Ã¢â€ â€™</span> <span class="text-slate-500">Typed</span>
+                                        <span class="text-error font-bold">A</span>
+                                    </div>
+                                    <div class="bg-surface p-2 rounded text-[10px] font-headline border border-white/5">
+                                        <span class="text-slate-500">Expected</span> <span
+                                            class="text-slate-100 font-bold">E</span> <span
+                                            class="text-primary mx-2">Ã¢â€ â€™</span> <span class="text-slate-500">Typed</span>
+                                        <span class="text-error font-bold">W</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-primary/5 border border-primary/20 p-4 rounded-lg text-center">
+                                <span
+                                    class="font-headline text-3xl font-bold text-primary cyan-glow-text block">242ms</span>
+                                <span
+                                    class="text-[10px] uppercase tracking-widest text-slate-500 font-headline block mt-1">Average
+                                    Recovery Time</span>
+                                <p class="text-[9px] text-slate-500 mt-2 leading-tight">Time taken to type the
+                                    next correct key after an error.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Middle Grid Row: Typing DNA + Hardware Hotspots (paired) -->
+            <div class="col-span-12">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div class="col-span-12 lg:col-span-3 glass-panel p-6 rounded-xl flex flex-col">
+                        <h2 class="font-headline text-lg font-bold mb-6">Typing DNA</h2>
+                        <div class="space-y-4 flex-1">
+                            <div>
+                                <span class="text-xs text-slate-500 block mb-1">Reaction Latency</span>
+                                <span class="font-headline text-xl text-primary">184ms</span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-slate-500 block mb-1">Consistency Rating</span>
+                                <span class="font-headline text-xl text-slate-100">94.2%</span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-slate-500 block mb-1">Burst Max</span>
+                                <span class="font-headline text-xl text-primary">192 WPM</span>
+                            </div>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-white/5">
+                            <span class="text-[10px] uppercase text-slate-500 block mb-2">Slowest Bigrams</span>
+                            <div class="flex gap-2 flex-wrap">
+                                <span
+                                    class="bg-tertiary/10 px-2 py-1 rounded text-error text-xs font-headline">qu</span>
+                                <span
+                                    class="bg-tertiary/10 px-2 py-1 rounded text-error text-xs font-headline">ze</span>
+                                <span
+                                    class="bg-tertiary/10 px-2 py-1 rounded text-error text-xs font-headline">br</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        class="col-span-12 lg:col-span-9 glass-panel p-6 rounded-xl flex flex-col items-center">
+                        <div class="w-full flex justify-between items-center mb-6">
+                            <h2 class="font-headline text-lg font-bold">Hardware Hotspots</h2>
+                            <span class="text-xs text-slate-500 font-headline uppercase tracking-widest">Errors per
+                                Key</span>
+                        </div>
+                        <div class="flex-1 w-full flex items-center justify-center">
+                            <div class="flex flex-col gap-2.5 font-headline scale-90 lg:scale-110">
+                            <div class="flex gap-1.5 justify-center">
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-surface flex items-center justify-center text-xs">
+                                    Q</div>
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-surface flex items-center justify-center text-xs">
+                                    W</div>
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-tertiary/20 text-error flex items-center justify-center text-xs">
+                                    E</div>
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-surface flex items-center justify-center text-xs">
+                                    R</div>
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-surface flex items-center justify-center text-xs">
+                                    T</div>
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-surface flex items-center justify-center text-xs">
+                                    Y</div>
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-surface flex items-center justify-center text-xs">
+                                    U</div>
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-surface flex items-center justify-center text-xs">
+                                    I</div>
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-surface flex items-center justify-center text-xs">
+                                    O</div>
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-tertiary/40 text-error font-bold flex items-center justify-center text-xs">
+                                    P</div>
+                            </div>
+                            <div class="flex gap-1.5 justify-center pl-5">
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-primary/20 text-primary flex items-center justify-center text-xs">
+                                    A</div>
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-surface flex items-center justify-center text-xs">
+                                    S</div>
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-surface flex items-center justify-center text-xs">
+                                    D</div>
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-tertiary/20 text-error flex items-center justify-center text-xs">
+                                    F</div>
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-surface flex items-center justify-center text-xs">
+                                    G</div>
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-surface flex items-center justify-center text-xs">
+                                    H</div>
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-surface flex items-center justify-center text-xs">
+                                    J</div>
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-surface flex items-center justify-center text-xs">
+                                    K</div>
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-surface flex items-center justify-center text-xs">
+                                    L</div>
+                            </div>
+                            <div class="flex gap-1.5 justify-center pl-10">
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-surface flex items-center justify-center text-xs">
+                                    Z</div>
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-surface flex items-center justify-center text-xs">
+                                    X</div>
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-tertiary/10 flex items-center justify-center text-xs">
+                                    C</div>
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-surface flex items-center justify-center text-xs">
+                                    V</div>
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-surface flex items-center justify-center text-xs">
+                                    B</div>
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-surface flex items-center justify-center text-xs">
+                                    N</div>
+                                <div
+                                    class="w-10 h-10 rounded border border-white/10 bg-surface flex items-center justify-center text-xs">
+                                    M</div>
+                            </div>
+                            <div class="flex gap-1.5 justify-center">
+                                <div
+                                    class="w-64 h-10 rounded border border-white/10 bg-primary/10 flex items-center justify-center text-[10px] uppercase tracking-[0.2em] text-slate-500/60">
+                                    Space</div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Full Width Layout: Activity Tracker followed by Score Distribution -->
+            <div class="col-span-12 glass-panel p-6 rounded-xl overflow-hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="font-headline text-lg font-bold tracking-tight">Activity Tracker</h2>
+                    <div class="flex items-center gap-2 text-xs text-slate-400 font-headline uppercase tracking-widest">
+                        <span>Less</span>
+                        <div class="flex gap-1">
+                            <div class="w-3 h-3 rounded-sm bg-surface-light"></div>
+                            <div class="w-3 h-3 rounded-sm bg-primary/20"></div>
+                            <div class="w-3 h-3 rounded-sm bg-primary/40"></div>
+                            <div class="w-3 h-3 rounded-sm bg-primary/70 shadow-[0_0_8px_rgba(108,218,255,0.4)]"></div>
+                        </div>
+                        <span>More</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-[repeat(52,minmax(0,1fr))] gap-1.5 overflow-x-auto scrollbar-hide py-2">
+                    <script>
+                        const activityMap = () => {
+                            const colors = ['bg-surface-light', 'bg-primary/10', 'bg-primary/30', 'bg-primary/50', 'bg-primary/80'];
+                            let html = '';
+                            for (let i = 0; i < 52 * 7; i++) {
+                                const color = colors[Math.floor(Math.random() * colors.length)];
+                                const glow = color.includes('/80') ? 'shadow-[0_0_5px_rgba(108,218,255,0.3)]' : '';
+                                html += `<div class="aspect-square rounded-sm ${color} ${glow}"></div>`;
+                            }
+                            document.write(html);
+                        }
+                        activityMap();
+                    </script>
+                </div>
+                <div
+                    class="flex justify-between mt-4 text-[10px] text-slate-400 uppercase tracking-widest font-headline">
+                    <span>Mar 2023</span>
+                    <span>Aug 2023</span>
+                    <span>Jan 2024</span>
+                    <span>Present</span>
+                </div>
+                <p class="text-xs text-primary mt-6 italic font-headline tracking-tight">Streak: 12 days. Keep it up!
+                </p>
+            </div>
+            <div class="col-span-12 glass-panel p-6 rounded-xl">
+                <h2 class="font-headline text-lg font-bold mb-6">Score Distribution</h2>
+                <div class="flex items-end gap-1 h-32 w-full max-w-4xl mx-auto">
+                    <div class="bg-surface-light flex-1 h-[10%] rounded-t-sm"></div>
+                    <div class="bg-surface-light flex-1 h-[25%] rounded-t-sm"></div>
+                    <div class="bg-primary/40 flex-1 h-[45%] rounded-t-sm"></div>
+                    <div class="bg-primary/70 flex-1 h-[70%] rounded-t-sm"></div>
+                    <div class="bg-primary flex-1 h-[100%] rounded-t-sm"></div>
+                    <div class="bg-primary/70 flex-1 h-[65%] rounded-t-sm"></div>
+                    <div class="bg-primary/40 flex-1 h-[30%] rounded-t-sm"></div>
+                    <div class="bg-surface-light flex-1 h-[15%] rounded-t-sm"></div>
+                    <div class="bg-surface-light flex-1 h-[5%] rounded-t-sm"></div>
+                </div>
+                <div
+                    class="flex justify-between mt-2 text-[10px] text-slate-500 font-headline uppercase w-full max-w-4xl mx-auto">
+                    <span>60 WPM</span>
+                    <span>100 WPM</span>
+                    <span>140 WPM</span>
+                </div>
+            </div>
+            <!-- Test History Table -->
+            <div class="col-span-12 glass-panel rounded-xl overflow-hidden">
+                <div class="p-6 border-b border-white/5 flex justify-between items-center">
+                    <h2 class="font-headline text-lg font-bold">Comprehensive Test History</h2>
+                    <div class="flex gap-3">
+                        <button
+                            class="text-xs font-headline flex items-center gap-2 text-slate-500 hover:text-slate-100 transition-colors">
+                            <span class="material-symbols-outlined text-sm">download</span> Export CSV
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="bg-surface-light/30 text-[10px] uppercase tracking-widest text-slate-500">
+                                <th class="px-6 py-4 font-medium">Mode</th>
+                                <th class="px-6 py-4 font-medium">WPM</th>
+                                <th class="px-6 py-4 font-medium">Accuracy</th>
+                                <th class="px-6 py-4 font-medium">Raw</th>
+                                <th class="px-6 py-4 font-medium">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm divide-y divide-white/5">
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td class="px-6 py-4 font-headline text-slate-400">timed 60s</td>
+                                <td class="px-6 py-4 font-headline font-bold text-primary">128</td>
+                                <td class="px-6 py-4 text-slate-500">99.1%</td>
+                                <td class="px-6 py-4 text-slate-500">134</td>
+                                <td class="px-6 py-4 text-xs text-slate-500">2 mins ago</td>
+                            </tr>
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td class="px-6 py-4 font-headline text-slate-400">words 50</td>
+                                <td class="px-6 py-4 font-headline font-bold text-primary">147</td>
+                                <td class="px-6 py-4 text-slate-500">98.5%</td>
+                                <td class="px-6 py-4 text-slate-500">151</td>
+                                <td class="px-6 py-4 text-xs text-slate-500">1 hour ago</td>
+                            </tr>
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td class="px-6 py-4 font-headline text-slate-400">timed 30s</td>
+                                <td class="px-6 py-4 font-headline font-bold text-primary">135</td>
+                                <td class="px-6 py-4 text-slate-500">97.2%</td>
+                                <td class="px-6 py-4 text-slate-500">142</td>
+                                <td class="px-6 py-4 text-xs text-slate-500">5 hours ago</td>
+                            </tr>
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td class="px-6 py-4 font-headline text-slate-400">timed 15s</td>
+                                <td class="px-6 py-4 font-headline font-bold text-primary">142</td>
+                                <td class="px-6 py-4 text-slate-500">98.4%</td>
+                                <td class="px-6 py-4 text-slate-500">145</td>
+                                <td class="px-6 py-4 text-xs text-slate-500">Yesterday</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="p-4 bg-background-dark text-center">
+                    <button class="font-headline text-sm text-primary hover:underline transition-all">Load More
+                        Records</button>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- Footer (matching testpage) -->
+    <footer class="px-8 py-4 flex justify-end items-center relative z-20 zen-element">
+        <div class="flex items-center gap-2 text-[10px] text-slate-600 font-mono">
+            <span class="material-symbols-outlined text-[14px]">palette</span>
+            <span>Themes: </span>
+            <button
+                class="bg-surface border border-white/10 px-2 py-1 rounded text-slate-400 hover:text-white hover:border-primary/50 transition-colors">usertypo_</button>
+        </div>
+    </footer>
+
+    <script>
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        window.scrollTo(0, 0);
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // Ã¢â€â‚¬Ã¢â€â‚¬ SIDEBAR MENU Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+            const openMenuBtn = document.getElementById('open-menu-btn');
+            const sidebarMenu = document.getElementById('sidebar-menu');
+
+            if (openMenuBtn && sidebarMenu) {
+                openMenuBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    sidebarMenu.classList.remove('-translate-x-full');
+                    sidebarMenu.classList.add('translate-x-0');
+                    openMenuBtn.classList.add('is-active', 'opacity-0', 'pointer-events-none');
+                });
+                sidebarMenu.addEventListener('mouseleave', () => {
+                    sidebarMenu.classList.remove('translate-x-0');
+                    sidebarMenu.classList.add('-translate-x-full');
+                    openMenuBtn.classList.remove('is-active', 'opacity-0', 'pointer-events-none');
+                    openMenuBtn.blur();
+                });
+            }
+
+            // Ã¢â€â‚¬Ã¢â€â‚¬ PAGE-LEVEL CUSTOM SCROLLBAR Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+            const pageTrack = document.getElementById('page-scroll-track');
+            const pageThumb = document.getElementById('page-scroll-thumb');
+            let isDragging = false, startY, startScrollTop;
+
+            function updatePageScrollbar() {
+                const docH = document.documentElement.scrollHeight;
+                const winH = window.innerHeight;
+                const scrollable = docH - winH;
+                if (scrollable <= 0) { pageTrack.style.display = 'none'; return; }
+                pageTrack.style.display = 'block';
+                const pct = window.scrollY / scrollable;
+                const trackH = pageTrack.clientHeight;
+                const thumbH = Math.max(trackH * (winH / docH), 40);
+                pageThumb.style.height = thumbH + 'px';
+                pageThumb.style.top = (pct * (trackH - thumbH)) + 'px';
+            }
+
+            // Show on mouse near right edge
+            document.addEventListener('mousemove', e => {
+                if (isDragging || window.innerWidth - e.clientX < 40) {
+                    pageTrack.classList.remove('opacity-0', 'translate-x-4', 'pointer-events-none');
+                    pageTrack.classList.add('opacity-100', 'translate-x-0', 'pointer-events-auto');
+                } else {
+                    pageTrack.classList.add('opacity-0', 'translate-x-4', 'pointer-events-none');
+                    pageTrack.classList.remove('opacity-100', 'translate-x-0', 'pointer-events-auto');
+                }
+            });
+
+            window.addEventListener('scroll', updatePageScrollbar);
+            window.addEventListener('resize', updatePageScrollbar);
+
+            pageThumb.addEventListener('mousedown', e => {
+                isDragging = true;
+                startY = e.clientY;
+                startScrollTop = window.scrollY;
+                document.body.style.userSelect = 'none';
+                pageThumb.classList.add('bg-primary');
+            });
+            document.addEventListener('mousemove', e => {
+                if (!isDragging) return;
+                const docH = document.documentElement.scrollHeight;
+                const winH = window.innerHeight;
+                const maxScroll = docH - winH;
+                const thumbH = pageThumb.clientHeight;
+                const maxThumbTop = pageTrack.clientHeight - thumbH;
+                const deltaY = e.clientY - startY;
+                window.scrollTo(0, startScrollTop + (deltaY / maxThumbTop) * maxScroll);
+            });
+            document.addEventListener('mouseup', () => {
+                if (!isDragging) return;
+                isDragging = false;
+                document.body.style.userSelect = '';
+                pageThumb.classList.remove('bg-primary');
+            });
+
+            // Global Spacebar Scroll Prevention
+            window.addEventListener('keydown', (e) => {
+                if (e.key === ' ' || e.key === 'Spacebar') {
+                    const activeEl = document.activeElement;
+                    if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable)) {
+                        return;
+                    }
+                    e.preventDefault();
+                }
+            });
+
+            setTimeout(updatePageScrollbar, 100);
+
+            // Ã¢â€â‚¬Ã¢â€â‚¬ PREMIUM DRAG-AND-DROP Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+            const sortContainer = document.getElementById('sortable-container');
+            if (sortContainer) {
+
+                // State
+                let dragCard = null, dragClone = null, placeholder = null;
+                let rafId = null, scrollRAF = null;
+                let targetX = 0, targetY = 0;   // where cursor wants the clone
+                let currentX = 0, currentY = 0; // current lerp position
+                let offX = 0, offY = 0;
+                const LERP = 0.13;              // smoothing factor (0=no follow, 1=instant)
+                const SCROLL_ZONE = 80, SCROLL_SPEED = 13;
+
+                // Ã¢â€â‚¬Ã¢â€â‚¬ Setup cards Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+                Array.from(sortContainer.children).forEach((card, i) => {
+                    const heading = card.querySelector('h2');
+                    const id = heading
+                        ? heading.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '')
+                        : `card-${i}`;
+                    card.dataset.cardId = id;
+                    card.classList.add('sortable-card');
+
+                    if (id === 'comprehensive-test-history') {
+                        card.classList.add('card-static');
+                        return;
+                    }
+
+                    card.style.position = 'relative';
+                    
+                    const h2 = card.querySelector('h2');
+                    if (h2) {
+                        const handle = document.createElement('div');
+                        handle.className = 'drag-handle';
+                        handle.innerHTML = '<span class="material-symbols-outlined text-[18px] text-slate-400 hover:text-primary transition-colors">drag_indicator</span>';
+                        h2.classList.add('flex', 'items-center', 'gap-2', '-ml-2');
+                        h2.insertBefore(handle, h2.firstChild);
+                        
+                        handle.addEventListener('mousedown', e => {
+                            e.preventDefault();
+                            if (dragCard) return; // block double-fire
+                            startDrag(card, e.clientX, e.clientY);
+                        });
+                    } else {
+                        const handle = document.createElement('div');
+                        handle.className = 'drag-handle';
+                        handle.innerHTML = '<span class="material-symbols-outlined text-[18px] text-slate-400 hover:text-primary transition-colors">drag_indicator</span>';
+                        card.insertBefore(handle, card.firstChild);
+                        
+                        handle.addEventListener('mousedown', e => {
+                            e.preventDefault();
+                            if (dragCard) return; // block double-fire
+                            startDrag(card, e.clientX, e.clientY);
+                        });
+                    }
+                });
+
+                // Ã¢â€â‚¬Ã¢â€â‚¬ Lerp animation loop Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+                function lerpLoop() {
+                    if (!dragClone) return;
+                    currentX += (targetX - currentX) * LERP;
+                    currentY += (targetY - currentY) * LERP;
+                    dragClone.style.left = currentX + 'px';
+                    dragClone.style.top = currentY + 'px';
+                    rafId = requestAnimationFrame(lerpLoop);
+                }
+
+                // Ã¢â€â‚¬Ã¢â€â‚¬ Drag start Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+                function startDrag(card, startX, startY) {
+                    dragCard = card;
+                    const rect = card.getBoundingClientRect();
+                    offX = startX - rect.left;
+                    offY = startY - rect.top;
+                    currentX = targetX = rect.left;
+                    currentY = targetY = rect.top;
+
+                    // 1. Clone FIRST (before dimming) so clone has all original classes
+                    dragClone = card.cloneNode(true);
+                    // Keep card's own classes (rounded-xl, glass-panel, p-6Ã¢â‚¬Â¦) + add drag-clone
+                    dragClone.className = card.className + ' drag-clone';
+                    dragClone.style.width = rect.width + 'px';
+                    dragClone.style.height = rect.height + 'px';
+                    dragClone.style.left = currentX + 'px';
+                    dragClone.style.top = currentY + 'px';
+                    // Remove handle icon from clone
+                    const cloneHandles = dragClone.querySelectorAll('.drag-handle');
+                    cloneHandles.forEach(h => h.remove());
+                    document.body.appendChild(dragClone);
+
+                    // 2. Dim source card in-place (holds its grid slot)
+                    card.classList.add('is-dragging');
+
+                    document.body.style.userSelect = 'none';
+                    document.body.style.cursor = 'grabbing';
+
+                    rafId = requestAnimationFrame(lerpLoop);
+                    document.addEventListener('mousemove', onMove);
+                    document.addEventListener('mouseup', onUp);
+                }
+
+                // Ã¢â€â‚¬Ã¢â€â‚¬ Mouse move (live-swap) Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+                function onMove(e) {
+                    targetX = e.clientX - offX;
+                    targetY = e.clientY - offY;
+                    autoScroll(e.clientY);
+
+                    // Move the dimmed source card live to the hovered position.
+                    // No separate placeholder Ã¢â‚¬â€ the card itself IS the slot indicator.
+                    const sortables = [...sortContainer.querySelectorAll(
+                        '.sortable-card:not(.is-dragging):not(.card-static)'
+                    )];
+                    for (const sib of sortables) {
+                        const r = sib.getBoundingClientRect();
+                        if (e.clientY >= r.top && e.clientY <= r.bottom) {
+                            if (e.clientY < r.top + r.height / 2) {
+                                sortContainer.insertBefore(dragCard, sib);
+                            } else {
+                                sib.after(dragCard);
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                // Ã¢â€â‚¬Ã¢â€â‚¬ Mouse up / drop Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+                function onUp() {
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('mouseup', onUp);
+                    cancelAnimationFrame(rafId);
+                    cancelAnimationFrame(scrollRAF);
+                    rafId = scrollRAF = null;
+
+                    if (!dragCard || !dragClone) return;
+
+                    // Glide clone to wherever the card landed, then fade it out
+                    const finalRect = dragCard.getBoundingClientRect();
+                    dragClone.style.transition = [
+                        'left 0.20s cubic-bezier(0.16,1,0.3,1)',
+                        'top  0.20s cubic-bezier(0.16,1,0.3,1)',
+                        'transform 0.20s cubic-bezier(0.16,1,0.3,1)',
+                        'opacity 0.15s ease'
+                    ].join(',');
+                    dragClone.style.left = finalRect.left + 'px';
+                    dragClone.style.top = finalRect.top + 'px';
+                    dragClone.style.transform = 'scale(1)';
+                    dragClone.style.opacity = '0';
+
+                    setTimeout(() => {
+                        if (!dragCard) return;
+                        dragCard.classList.remove('is-dragging');
+                        dragClone.remove();
+                        document.body.style.userSelect = '';
+                        document.body.style.cursor = '';
+                        // Subtle pop-in to confirm the drop
+                        dragCard.animate(
+                            [{ transform: 'scale(1.015)', opacity: '0.7' },
+                            { transform: 'scale(1)', opacity: '1' }],
+                            { duration: 250, easing: 'cubic-bezier(0.16,1,0.3,1)', fill: 'forwards' }
+                        );
+                        dragCard = null; dragClone = null; placeholder = null;
+                        saveSortOrder();
+                    }, 210);
+                }
+
+                // Ã¢â€â‚¬Ã¢â€â‚¬ Edge scroll Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+                function autoScroll(clientY) {
+                    cancelAnimationFrame(scrollRAF);
+                    const winH = window.innerHeight;
+                    let delta = 0;
+                    if (clientY < SCROLL_ZONE)
+                        delta = -SCROLL_SPEED * (1 - clientY / SCROLL_ZONE);
+                    else if (clientY > winH - SCROLL_ZONE)
+                        delta = SCROLL_SPEED * (1 - (winH - clientY) / SCROLL_ZONE);
+                    if (delta !== 0) {
+                        window.scrollBy(0, delta);
+                        scrollRAF = requestAnimationFrame(() => autoScroll(clientY));
+                    }
+                }
+
+                function saveSortOrder() {
+                    const order = [...sortContainer.querySelectorAll('.sortable-card')].map(c => c.dataset.cardId);
+                    localStorage.setItem('userstats-card-order', JSON.stringify(order));
+                }
+
+                function restoreSortOrder() {
+                    const saved = localStorage.getItem('userstats-card-order');
+                    if (!saved) return;
+                    try {
+                        const order = JSON.parse(saved);
+                        const cardMap = {};
+                        sortContainer.querySelectorAll('.sortable-card').forEach(c => {
+                            cardMap[c.dataset.cardId] = c;
+                        });
+                        // Keep static cards in place
+                        const staticCard = sortContainer.querySelector('.card-static');
+                        order.forEach(id => {
+                            const c = cardMap[id];
+                            if (c && !c.classList.contains('card-static')) {
+                                if (staticCard) {
+                                    sortContainer.insertBefore(c, staticCard);
+                                } else {
+                                    sortContainer.appendChild(c);
+                                }
+                            }
+                        });
+                    } catch (e) { }
+                }
+
+                restoreSortOrder();
+            }
+        });
+    </script>
+
+    <!-- Apply saved settings globally -->
+    <script src="settings.js"></script>
+</body>
+
+</html>

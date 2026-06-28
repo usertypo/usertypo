@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Leaderboards - See where you rank | usertypo_ </title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Inter:wght@400;500;600;700;900&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#00d0ff', 'primary-dark': '#0090b0', 'primary-light': '#33d9ff',
+                        background: '#121418', 'background-dark': '#0e1013',
+                        surface: '#1a1d23', 'surface-light': '#252932', error: '#ff3333',
+                    },
+                    fontFamily: { mono: ['"Roboto Mono"', 'monospace'], sans: ['Inter', 'sans-serif'] },
+                    keyframes: {
+                        blink: { '0%, 100%': { opacity: '1' }, '50%': { opacity: '0' } },
+                        'fade-in': { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+                        'fade-in-up': { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
+                    },
+                    animation: { blink: 'blink 1s step-end infinite', 'fade-in': 'fade-in 1s ease-out forwards', 'fade-in-up': 'fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards' }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        html::-webkit-scrollbar, body::-webkit-scrollbar { display: none !important; width: 0 !important; }
+        html, body { -ms-overflow-style: none !important; scrollbar-width: none !important; }
+        /* Responsive proportional scaling: 16px at 1227px viewport (14.5" laptop),
+           scales proportionally for all PC screens. All rem-based Tailwind values
+           (fonts, padding, gaps, widths, border-radius, max-width) auto-scale. */
+        html { font-size: clamp(13px, 1.3032vw, 24px); }
+
+        .glass-panel {
+            background: linear-gradient(145deg, rgba(26,29,35,0.4) 0%, rgba(26,29,35,0.2) 100%);
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(12px);
+        }
+        .glass-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            backdrop-filter: blur(4px);
+        }
+        .menu-btn { transition: all 0.2s ease; outline: none !important; -webkit-tap-highlight-color: transparent; }
+        .menu-btn:focus, .menu-btn:active { outline: none !important; background: transparent; }
+        .menu-btn:hover { color: white !important; text-shadow: 0 0 10px rgba(255,255,255,0.7); }
+        .menu-btn.is-active { color: #00d0ff !important; text-shadow: 0 0 15px rgba(0,208,255,0.8); }
+        .slide-ease { transition-timing-function: cubic-bezier(0.16,1,0.3,1); }
+        .zen-element { transition: opacity 0.5s ease-in-out; }
+        .zen-hidden { opacity: 0 !important; pointer-events: none !important; transition: opacity 0.5s ease-in-out; }
+
+        /* --- Config Bar: Testpage-matching expand/collapse --- */
+        #config-bar.is-open > div {
+            width: 12rem !important;
+            align-items: stretch !important;
+            padding: 1rem !important;
+        }
+        #config-bar.is-open .cfg-inner {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
+        #config-bar.is-open .opacity-0 {
+            opacity: 1 !important;
+        }
+        #config-bar.is-open .max-h-0 {
+            max-height: 200px;
+        }
+
+        /* Config bar glow */
+        #config-bar > div {
+            box-shadow: 0 0 12px rgba(0,208,255,0.35), 0 8px 32px rgba(0,0,0,0.3);
+            border-color: rgba(0,208,255,0.4) !important;
+        }
+
+        /* --- MODIFIER COLLAPSE LOGIC --- */
+        .cfg-btn, .cfg-divider {
+            transition: all 0.3s ease-in-out;
+            overflow: hidden;
+        }
+
+        /* When collapsed */
+        aside#config-bar:not(:hover):not(.is-open) .cfg-btn,
+        aside#config-bar:not(:hover):not(.is-open) .cfg-divider {
+            max-height: 0 !important; opacity: 0 !important;
+            margin-bottom: 0 !important; padding-top: 0 !important;
+            padding-bottom: 0 !important; border: none !important;
+        }
+
+        /* When hovered or open */
+        aside#config-bar:hover .cfg-btn,
+        aside#config-bar.is-open .cfg-btn { max-height: 32px !important; opacity: 1 !important; }
+        aside#config-bar:hover .cfg-btn:not(:last-child),
+        aside#config-bar.is-open .cfg-btn:not(:last-child) { margin-bottom: 0.75rem !important; }
+        aside#config-bar:hover .cfg-divider,
+        aside#config-bar.is-open .cfg-divider { max-height: 2px !important; opacity: 1 !important; margin: 0.5rem 0 !important; }
+        aside#config-bar:hover > div { width: 12rem !important; align-items: stretch !important; padding: 1rem !important; }
+        aside#config-bar:hover .cfg-inner { opacity: 1 !important; pointer-events: auto !important; }
+
+        /* Header Logo */
+        .header-logo-link { display: flex; align-items: center; justify-content: center; height: 48px; width: 180px; }
+        .header-logo-container { position: relative; width: 500px; height: 500px; transform: scale(0.5); margin: -250px; flex-shrink: 0; pointer-events: none; }
+        .header-logo-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .header-dynamic-layer { -webkit-mask-size: contain; mask-size: contain; -webkit-mask-repeat: no-repeat; -webkit-mask-position: center; opacity: 1; }
+        .header-typ-layer { background-color: #95efff; -webkit-mask-image: url('logo-assets/typ_.png'); mask-image: url('logo-assets/typ_.png'); }
+        .header-user-layer { background-color: #ffffff; -webkit-mask-image: url('logo-assets/user.png'); mask-image: url('logo-assets/user.png'); }
+        .header-static-layer { z-index: 3; object-fit: contain; pointer-events: none; animation: header-fade-o 1s ease-out 0s forwards; }
+        .header-typ-wrapper { z-index: 1; animation: header-fade-typ 1s ease-out 0s forwards; }
+        .header-user-wrapper { z-index: 2; animation: header-fade-user 1s ease-out 0s forwards; }
+        @keyframes header-fade-typ { 0% { filter: drop-shadow(0 0 0px rgba(128, 235, 255, 0)); } 100% { filter: drop-shadow(0 0 6px #95efff) drop-shadow(0 0 15px rgba(128, 235, 255, 0.55)); } }
+        @keyframes header-fade-user { 0% { filter: drop-shadow(0 0 0px rgba(255, 255, 255, 0)); } 100% { filter: drop-shadow(0 0 6px #ffffff) drop-shadow(0 0 15px rgba(255, 255, 255, 0.55)); } }
+        @keyframes header-fade-o { 0% { filter: drop-shadow(0 0 0px rgba(255, 51, 68, 0)); } 100% { filter: drop-shadow(0 0 6px #ff3344) drop-shadow(0 0 15px rgba(255, 51, 68, 0.55)); } }
+    </style>
+</head>
+
+<body class="bg-transparent text-slate-300 font-sans min-h-screen flex flex-col relative" id="app-body">
+
+    <!-- Backgrounds -->
+    <div class="fixed inset-0 z-0" style="background-color: #020016;"></div>
+
+    <!-- Page-level custom scrollbar (fixed, right edge) -->
+    <div id="page-scroll-track"
+        class="fixed top-2 bottom-2 right-1 w-1.5 z-[999] opacity-0 translate-x-4 transition-all duration-300 pointer-events-none">
+        <div id="page-scroll-thumb"
+            class="absolute top-0 right-0 w-full bg-primary/40 hover:bg-primary shadow-[0_0_10px_rgba(0,208,255,0.3)] backdrop-blur-md rounded-full cursor-pointer pointer-events-auto transition-colors duration-200">
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar-menu"
+        class="fixed top-0 left-0 h-[100dvh] w-[280px] z-[100] glass-panel rounded-r-3xl flex flex-col transform -translate-x-full transition-transform duration-500 slide-ease border-l-0 shadow-[20px_0_50px_rgba(0,0,0,0.5)] bg-surface/85 !backdrop-blur-sm">
+        <div class="p-6 pb-8">
+            <span class="material-symbols-outlined text-[24px] text-primary"
+                style="text-shadow: 0 0 10px rgba(0,208,255,0.6);">menu</span>
+        </div>
+        <nav class="flex-1 px-4 flex flex-col gap-2">
+            <a href="index.html"
+                class="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-all group">
+                <span
+                    class="material-symbols-outlined text-[22px] group-hover:text-primary group-hover:[text-shadow:0_0_10px_rgba(0,208,255,0.8)] transition-all">keyboard</span>
+                <span class="font-bold text-sm tracking-wide">Typing Test</span>
+            </a>
+            <a href="friends.html"
+                class="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-all group">
+                <span
+                    class="material-symbols-outlined text-[22px] group-hover:text-primary group-hover:[text-shadow:0_0_10px_rgba(0,208,255,0.8)] transition-all">group</span>
+                <span class="font-bold text-sm tracking-wide">Friends</span>
+            </a>
+            <a href="leaderboards.html"
+                class="flex items-center gap-4 px-4 py-3 rounded-xl text-primary bg-white/5 transition-all group">
+                <span
+                    class="material-symbols-outlined text-[22px] [text-shadow:0_0_10px_rgba(0,208,255,0.8)] transition-all">emoji_events</span>
+                <span class="font-bold text-sm tracking-wide">Leaderboards</span>
+            </a>
+            <a href="#"
+                class="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-all group">
+                <div class="relative flex items-center justify-center">
+                    <span
+                        class="material-symbols-outlined text-[22px] group-hover:text-primary group-hover:[text-shadow:0_0_10px_rgba(0,208,255,0.8)] transition-all">notifications</span>
+                    <span
+                        class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full shadow-[0_0_5px_rgba(239,68,68,0.8)] border border-surface"></span>
+                </div>
+                <span class="font-bold text-sm tracking-wide">Notifications</span>
+            </a>
+            <div class="h-px bg-white/10 w-full my-2"></div>
+            <a href="settings.html"
+                class="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-all group">
+                <span
+                    class="material-symbols-outlined text-[22px] group-hover:text-primary group-hover:[text-shadow:0_0_10px_rgba(0,208,255,0.8)] transition-all">settings</span>
+                <span class="font-bold text-sm tracking-wide">Settings</span>
+            </a>
+            <a href="#"
+                class="flex items-center gap-4 px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-all group">
+                <span
+                    class="material-symbols-outlined text-[22px] group-hover:text-primary group-hover:[text-shadow:0_0_10px_rgba(0,208,255,0.8)] transition-all">info</span>
+                <span class="font-bold text-sm tracking-wide">About</span>
+            </a>
+        </nav>
+        <div class="p-4 pb-6">
+            <a href="userstats.html"
+                class="glass-card border border-white/5 bg-black/20 rounded-2xl p-3 flex items-center justify-between hover:bg-white/5 transition-all cursor-pointer group">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-background-dark font-black text-lg shadow-[0_0_15px_rgba(0,208,255,0.4)]">
+                        G</div>
+                    <div class="flex flex-col justify-center">
+                        <span class="text-white font-bold text-sm leading-tight">GAMER_42</span>
+                        <span class="text-primary text-[11px] font-bold tracking-wide">Pro Member</span>
+                    </div>
+                </div>
+                <button class="text-slate-500 group-hover:text-white transition-colors mr-1">
+                    <span class="material-symbols-outlined text-[20px]">logout</span>
+                </button>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Floating Config Bar (center-left, matching testpage behaviour) -->
+    <aside id="config-bar"
+        class="fixed left-0 top-1/2 -translate-y-1/2 z-30 group zen-element transition-all duration-500">
+        <div class="border border-l-0 !border-l-0 rounded-r-2xl p-0 group-hover:p-4 flex flex-col w-2 group-hover:w-48 min-h-[200px] transition-all duration-500 ease-in-out items-center group-hover:items-stretch overflow-x-hidden overflow-y-auto max-h-[calc(100vh-8rem)] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-track]:my-4 [&::-webkit-scrollbar-thumb]:bg-white/10 hover:[&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full glass-panel bg-surface/85 !backdrop-blur-sm"
+            style="border-color:rgba(0,208,255,0.4);box-shadow:0 0 12px rgba(0,208,255,0.35), 0 8px 32px rgba(0,0,0,0.3);">
+            <div class="cfg-inner opacity-0 group-hover:opacity-100 transition-opacity duration-300 w-full flex flex-col min-w-[144px] pointer-events-none group-hover:pointer-events-auto"
+                id="inner-config-content">
+
+                <!-- Scope -->
+                <div class="flex flex-col w-full transition-all duration-500 shrink-0">
+                    <button id="cfg-global"
+                        class="cfg-btn is-scope flex items-center gap-4 text-xs font-mono text-primary font-bold h-8 px-[7px] rounded cursor-pointer w-full shrink-0"
+                        onclick="setScope('global',this)">
+                        <span
+                            class="material-symbols-outlined text-[18px] shrink-0 drop-shadow-[0_0_5px_rgba(0,208,255,0.4)]">public</span>
+                        <span
+                            class="opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap duration-300 delay-75 drop-shadow-[0_0_5px_rgba(0,208,255,0.4)]">global</span>
+                    </button>
+                    <button id="cfg-country"
+                        class="cfg-btn is-scope flex items-center gap-4 text-xs font-mono text-slate-400 h-8 px-[7px] rounded hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] cursor-pointer w-full shrink-0"
+                        onclick="setScope('country',this)">
+                        <span class="material-symbols-outlined text-[18px] shrink-0">flag</span>
+                        <span
+                            class="opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap duration-300 delay-75">country</span>
+                    </button>
+                    <button id="cfg-friends"
+                        class="cfg-btn is-scope flex items-center gap-4 text-xs font-mono text-slate-400 h-8 px-[7px] rounded hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] cursor-pointer w-full shrink-0"
+                        onclick="setScope('friends',this)">
+                        <span class="material-symbols-outlined text-[18px] shrink-0">group</span>
+                        <span
+                            class="opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap duration-300 delay-75">friends</span>
+                    </button>
+                </div>
+
+                <div class="cfg-divider w-full h-px bg-white/5 shrink-0 transition-all duration-500"></div>
+
+                <!-- Timeframe -->
+                <div class="flex flex-col w-full transition-all duration-500 shrink-0">
+                    <button id="cfg-alltime"
+                        class="cfg-btn is-time flex items-center gap-4 text-xs font-mono text-slate-400 h-8 px-[7px] rounded hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] cursor-pointer w-full shrink-0"
+                        onclick="setTime('alltime',this)">
+                        <span class="material-symbols-outlined text-[18px] shrink-0">all_inclusive</span>
+                        <span
+                            class="opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap duration-300 delay-75">all
+                            time</span>
+                    </button>
+                    <button id="cfg-monthly"
+                        class="cfg-btn is-time flex items-center gap-4 text-xs font-mono text-slate-400 h-8 px-[7px] rounded hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] cursor-pointer w-full shrink-0"
+                        onclick="setTime('monthly',this)">
+                        <span class="material-symbols-outlined text-[18px] shrink-0">calendar_month</span>
+                        <span
+                            class="opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap duration-300 delay-75">monthly</span>
+                    </button>
+                    <button id="cfg-weekly"
+                        class="cfg-btn is-time flex items-center gap-4 text-xs font-mono text-slate-400 h-8 px-[7px] rounded hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] cursor-pointer w-full shrink-0"
+                        onclick="setTime('weekly',this)">
+                        <span class="material-symbols-outlined text-[18px] shrink-0">date_range</span>
+                        <span
+                            class="opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap duration-300 delay-75">weekly</span>
+                    </button>
+                    <button id="cfg-daily"
+                        class="cfg-btn is-time flex items-center gap-4 text-xs font-mono text-primary font-bold h-8 px-[7px] rounded cursor-pointer w-full shrink-0"
+                        onclick="setTime('daily',this)">
+                        <span
+                            class="material-symbols-outlined text-[18px] shrink-0 drop-shadow-[0_0_5px_rgba(0,208,255,0.4)]">today</span>
+                        <span
+                            class="opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap duration-300 delay-75 drop-shadow-[0_0_5px_rgba(0,208,255,0.4)]">daily</span>
+                    </button>
+                </div>
+
+                <div class="cfg-divider w-full h-px bg-white/5 shrink-0 transition-all duration-500"></div>
+
+                <!-- Duration -->
+                <div class="flex flex-col w-full transition-all duration-500 shrink-0">
+                    <button id="cfg-15"
+                        class="cfg-btn is-dur flex items-center gap-4 text-xs font-mono text-slate-400 h-8 px-[6px] rounded hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] cursor-pointer w-full shrink-0"
+                        onclick="setDur('15',this)">
+                        <span class="w-5 text-center shrink-0">15</span>
+                        <span
+                            class="opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap -ml-1 duration-300 delay-75">seconds</span>
+                    </button>
+                    <button id="cfg-30"
+                        class="cfg-btn is-dur flex items-center gap-4 text-xs font-mono text-primary font-bold h-8 px-[6px] rounded cursor-pointer w-full shrink-0"
+                        onclick="setDur('30',this)">
+                        <span class="w-5 text-center shrink-0 drop-shadow-[0_0_5px_rgba(0,208,255,0.4)]">30</span>
+                        <span
+                            class="opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap -ml-1 drop-shadow-[0_0_5px_rgba(0,208,255,0.4)] duration-300 delay-75">seconds</span>
+                    </button>
+                    <button id="cfg-60"
+                        class="cfg-btn is-dur flex items-center gap-4 text-xs font-mono text-slate-400 h-8 px-[6px] rounded hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] cursor-pointer w-full shrink-0"
+                        onclick="setDur('60',this)">
+                        <span class="w-5 text-center shrink-0">60</span>
+                        <span
+                            class="opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap -ml-1 duration-300 delay-75">seconds</span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </aside>
+
+    <!-- Header -->
+    <header class="flex items-center justify-between px-6 py-4 bg-transparent shrink-0 relative z-20">
+        <div class="flex items-center gap-3 w-1/3 zen-element">
+            <button id="open-menu-btn"
+                class="menu-btn text-slate-400 hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.8)] transition-all duration-300">
+                <span class="material-symbols-outlined text-[24px]">menu</span>
+            </button>
+        </div>
+        <div class="flex items-center justify-center w-1/3">
+            <a href="index.html" class="header-logo-link">
+                <div class="header-logo-container">
+                    <div class="header-logo-layer header-typ-wrapper">
+                        <div class="header-logo-layer header-dynamic-layer header-typ-layer"></div>
+                    </div>
+                    <div class="header-logo-layer header-user-wrapper">
+                        <div class="header-logo-layer header-dynamic-layer header-user-layer"></div>
+                    </div>
+                    <img src="logo-assets/o.png" class="header-logo-layer header-static-layer">
+                </div>
+            </a>
+        </div>
+        <div class="flex items-center justify-end w-1/3 gap-8 zen-element">
+            <a href="userstats.html"
+                class="flex items-center justify-center rounded-full bg-surface/40 border border-white/5 w-10 h-10 text-slate-300 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all font-bold backdrop-blur-md shadow-[0_4px_15px_rgba(0,0,0,0.2)] hover:shadow-[0_0_15px_rgba(0,208,255,0.25)] group">
+                <span
+                    class="material-symbols-outlined text-[18px] text-primary group-hover:text-white transition-colors">person</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 w-full max-w-7xl mx-auto px-6 pt-0 pb-4 flex flex-col lg:flex-row gap-6 relative z-10">
+
+        <!-- Left: Leaderboard Area -->
+        <div class="flex-1 flex flex-col gap-4">
+
+            <!-- Title -->
+            <div
+                class="flex flex-col relative opacity-0 animate-fade-in-up [animation-delay:200ms] px-1 py-2">
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-100 mb-1">Leaderboards</h1>
+                    <p class="text-slate-400 text-sm">See where you stand and climb the ranks.</p>
+                </div>
+            </div>
+
+            <!-- Leaderboard Table (no scroll Ã¢â‚¬â€ page scrolls instead) -->
+            <div
+                class="glass-panel rounded-xl flex flex-col overflow-hidden opacity-0 animate-fade-in-up [animation-delay:300ms]">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-surface/80 backdrop-blur-md">
+                        <tr class="border-l-4 border-transparent">
+                            <th class="py-3 px-5 text-xs font-semibold text-slate-400 uppercase tracking-wider w-16">
+                                Rank</th>
+                            <th class="py-3 px-5 text-xs font-semibold text-slate-400 uppercase tracking-wider">User
+                            </th>
+                            <th
+                                class="py-3 px-5 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">
+                                WPM</th>
+                            <th
+                                class="py-3 px-5 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right">
+                                Accuracy</th>
+                            <th
+                                class="py-3 px-5 text-xs font-semibold text-slate-400 uppercase tracking-wider text-right hidden sm:table-cell">
+                                Date</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5 font-mono text-sm" id="lb-tbody">
+                        <!-- Rows injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Right: Ad -->
+        <div class="w-[10rem] shrink-0 glass-panel rounded-xl flex flex-col relative overflow-hidden hidden lg:flex sticky top-4"
+            style="height: calc(100vh - 2rem); align-self: flex-start;">
+            <div class="w-full py-2 bg-black/20 text-center border-b border-white/5">
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Sponsored</span>
+            </div>
+            <div class="flex-1 flex flex-col items-center justify-center p-3">
+                <div
+                    class="w-full h-full border border-dashed border-white/10 rounded-lg flex flex-col items-center justify-center gap-6 bg-black/10 py-8">
+                    <span class="material-symbols-outlined text-slate-600 text-4xl">ads_click</span>
+                    <div class="text-center px-1">
+                        <p class="text-xs text-slate-400 font-bold">YOUR AD HERE</p>
+                        <p class="text-[10px] text-slate-600 font-mono">160x600 Skyscraper</p>
+                    </div>
+                    <button
+                        class="px-4 py-2 bg-white/5 rounded text-[10px] font-bold text-slate-400 border border-white/5">Learn
+                        More</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer (matching testpage) -->
+    <footer class="px-8 py-4 flex justify-end items-center relative z-20 zen-element">
+        <div class="flex items-center gap-2 text-[10px] text-slate-600 font-mono">
+            <span class="material-symbols-outlined text-[14px]">palette</span>
+            <span>Themes: </span>
+            <button
+                class="bg-surface border border-white/10 px-2 py-1 rounded text-slate-400 hover:text-white hover:border-primary/50 transition-colors">usertypo_</button>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // Ã¢â€â‚¬Ã¢â€â‚¬ LEADERBOARD DATA Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+            const players = [
+                { rank: '01', name: 'AlexTypist', wpm: 165, acc: '99.5%', date: '2023-10-24', colorClass: 'bg-primary/20 text-primary border-primary/30', letter: 'A' },
+                { rank: '02', name: 'SpeedDemon', wpm: 160, acc: '98.2%', date: '2023-10-24', colorClass: 'bg-purple-500/20 text-purple-400 border-purple-500/30', letter: 'S' },
+                { rank: '03', name: 'GAMER_42', wpm: 158, acc: '98.0%', date: 'Today', colorClass: 'bg-primary text-background-dark', letter: 'G', isMe: true },
+                { rank: '04', name: 'FastFingers', wpm: 155, acc: '97.8%', date: '2023-10-23', colorClass: 'bg-green-500/20 text-green-400 border-green-500/30', letter: 'F' },
+                { rank: '05', name: 'TypingPro', wpm: 150, acc: '99.1%', date: '2023-10-23', colorClass: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30', letter: 'T' },
+                { rank: '06', name: 'KeyboardNinja', wpm: 148, acc: '96.5%', date: '2023-10-22', colorClass: 'bg-slate-500/20 text-slate-400 border-slate-500/30', letter: 'K' },
+                { rank: '07', name: 'KeyMaster', wpm: 145, acc: '97.2%', date: '2023-10-22', colorClass: 'bg-orange-500/20 text-orange-400 border-orange-500/30', letter: 'K' },
+                { rank: '08', name: 'SwiftTyper', wpm: 142, acc: '95.8%', date: '2023-10-21', colorClass: 'bg-pink-500/20 text-pink-400 border-pink-500/30', letter: 'S' },
+                { rank: '09', name: 'WordSmith', wpm: 140, acc: '98.5%', date: '2023-10-21', colorClass: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30', letter: 'W' },
+                { rank: '10', name: 'QuickKeys', wpm: 138, acc: '96.0%', date: '2023-10-20', colorClass: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30', letter: 'Q' },
+                { rank: '11', name: 'RapidTyper', wpm: 135, acc: '95.5%', date: '2023-10-19', colorClass: 'bg-primary/20 text-primary border-primary/30', letter: 'R' },
+                { rank: '12', name: 'DashTyper', wpm: 132, acc: '94.8%', date: '2023-10-18', colorClass: 'bg-purple-500/20 text-purple-400 border-purple-500/30', letter: 'D' },
+                { rank: '13', name: 'VelocityKeys', wpm: 130, acc: '94.2%', date: '2023-10-17', colorClass: 'bg-green-500/20 text-green-400 border-green-500/30', letter: 'V' },
+                { rank: '14', name: 'TurboType', wpm: 128, acc: '93.9%', date: '2023-10-16', colorClass: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30', letter: 'T' },
+                { rank: '15', name: 'MasterKeys', wpm: 125, acc: '93.0%', date: '2023-10-15', colorClass: 'bg-slate-500/20 text-slate-400 border-slate-500/30', letter: 'M' },
+                { rank: '16', name: 'ByteRunner', wpm: 123, acc: '92.8%', date: '2023-10-14', colorClass: 'bg-teal-500/20 text-teal-400 border-teal-500/30', letter: 'B' },
+                { rank: '17', name: 'FlashType', wpm: 121, acc: '92.5%', date: '2023-10-14', colorClass: 'bg-orange-500/20 text-orange-400 border-orange-500/30', letter: 'F' },
+                { rank: '18', name: 'ProKeys', wpm: 119, acc: '91.9%', date: '2023-10-13', colorClass: 'bg-rose-500/20 text-rose-400 border-rose-500/30', letter: 'P' },
+                { rank: '19', name: 'TypeLord', wpm: 117, acc: '91.5%', date: '2023-10-13', colorClass: 'bg-violet-500/20 text-violet-400 border-violet-500/30', letter: 'T' },
+                { rank: '20', name: 'SprintKeys', wpm: 115, acc: '91.2%', date: '2023-10-12', colorClass: 'bg-amber-500/20 text-amber-400 border-amber-500/30', letter: 'S' },
+                { rank: '21', name: 'NightTypist', wpm: 114, acc: '90.8%', date: '2023-10-12', colorClass: 'bg-slate-500/20 text-slate-400 border-slate-500/30', letter: 'N' },
+                { rank: '22', name: 'GridRunner', wpm: 112, acc: '90.5%', date: '2023-10-11', colorClass: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30', letter: 'G' },
+                { rank: '23', name: 'AlphaKeys', wpm: 111, acc: '90.1%', date: '2023-10-11', colorClass: 'bg-primary/20 text-primary border-primary/30', letter: 'A' },
+                { rank: '24', name: 'NeonTypist', wpm: 110, acc: '89.8%', date: '2023-10-10', colorClass: 'bg-green-500/20 text-green-400 border-green-500/30', letter: 'N' },
+                { rank: '25', name: 'ZeroLag', wpm: 108, acc: '89.5%', date: '2023-10-10', colorClass: 'bg-purple-500/20 text-purple-400 border-purple-500/30', letter: 'Z' },
+                { rank: '26', name: 'WarpTyper', wpm: 107, acc: '89.2%', date: '2023-10-09', colorClass: 'bg-pink-500/20 text-pink-400 border-pink-500/30', letter: 'W' },
+                { rank: '27', name: 'SonicKeys', wpm: 106, acc: '88.9%', date: '2023-10-09', colorClass: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30', letter: 'S' },
+                { rank: '28', name: 'MaxSpeed', wpm: 105, acc: '88.6%', date: '2023-10-08', colorClass: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30', letter: 'M' },
+                { rank: '29', name: 'CodeFingers', wpm: 103, acc: '88.3%', date: '2023-10-08', colorClass: 'bg-teal-500/20 text-teal-400 border-teal-500/30', letter: 'C' },
+                { rank: '30', name: 'QuantumType', wpm: 102, acc: '88.0%', date: '2023-10-07', colorClass: 'bg-orange-500/20 text-orange-400 border-orange-500/30', letter: 'Q' },
+                { rank: '31', name: 'LightSpeed', wpm: 101, acc: '87.8%', date: '2023-10-07', colorClass: 'bg-amber-500/20 text-amber-400 border-amber-500/30', letter: 'L' },
+                { rank: '32', name: 'HyperTyper', wpm: 100, acc: '87.5%', date: '2023-10-06', colorClass: 'bg-rose-500/20 text-rose-400 border-rose-500/30', letter: 'H' },
+                { rank: '33', name: 'DeltaKeys', wpm: 99, acc: '87.2%', date: '2023-10-06', colorClass: 'bg-violet-500/20 text-violet-400 border-violet-500/30', letter: 'D' },
+                { rank: '34', name: 'OmegaTypist', wpm: 98, acc: '86.9%', date: '2023-10-05', colorClass: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30', letter: 'O' },
+                { rank: '35', name: 'PhaseTyper', wpm: 97, acc: '86.6%', date: '2023-10-05', colorClass: 'bg-green-500/20 text-green-400 border-green-500/30', letter: 'P' },
+                { rank: '36', name: 'NovaPulse', wpm: 96, acc: '86.3%', date: '2023-10-04', colorClass: 'bg-primary/20 text-primary border-primary/30', letter: 'N' },
+                { rank: '37', name: 'EchoFingers', wpm: 95, acc: '86.0%', date: '2023-10-04', colorClass: 'bg-purple-500/20 text-purple-400 border-purple-500/30', letter: 'E' },
+                { rank: '38', name: 'BlastKeys', wpm: 94, acc: '85.8%', date: '2023-10-03', colorClass: 'bg-pink-500/20 text-pink-400 border-pink-500/30', letter: 'B' },
+                { rank: '39', name: 'CoreTypist', wpm: 93, acc: '85.5%', date: '2023-10-03', colorClass: 'bg-slate-500/20 text-slate-400 border-slate-500/30', letter: 'C' },
+                { rank: '40', name: 'PlumaType', wpm: 92, acc: '85.2%', date: '2023-10-02', colorClass: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30', letter: 'P' },
+                { rank: '41', name: 'VortexKeys', wpm: 91, acc: '85.0%', date: '2023-10-02', colorClass: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30', letter: 'V' },
+                { rank: '42', name: 'MachType', wpm: 90, acc: '84.8%', date: '2023-10-01', colorClass: 'bg-teal-500/20 text-teal-400 border-teal-500/30', letter: 'M' },
+                { rank: '43', name: 'PeakTyper', wpm: 89, acc: '84.5%', date: '2023-10-01', colorClass: 'bg-orange-500/20 text-orange-400 border-orange-500/30', letter: 'P' },
+                { rank: '44', name: 'AbyssKeys', wpm: 88, acc: '84.2%', date: '2023-09-30', colorClass: 'bg-rose-500/20 text-rose-400 border-rose-500/30', letter: 'A' },
+                { rank: '45', name: 'ZephyrType', wpm: 87, acc: '83.9%', date: '2023-09-30', colorClass: 'bg-violet-500/20 text-violet-400 border-violet-500/30', letter: 'Z' },
+                { rank: '46', name: 'PulseTypist', wpm: 86, acc: '83.7%', date: '2023-09-29', colorClass: 'bg-amber-500/20 text-amber-400 border-amber-500/30', letter: 'P' },
+                { rank: '47', name: 'ChronoKeys', wpm: 85, acc: '83.4%', date: '2023-09-29', colorClass: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30', letter: 'C' },
+                { rank: '48', name: 'GhostTyper', wpm: 84, acc: '83.1%', date: '2023-09-28', colorClass: 'bg-slate-500/20 text-slate-400 border-slate-500/30', letter: 'G' },
+                { rank: '49', name: 'IonType', wpm: 83, acc: '82.8%', date: '2023-09-28', colorClass: 'bg-green-500/20 text-green-400 border-green-500/30', letter: 'I' },
+                { rank: '50', name: 'ArcTypist', wpm: 82, acc: '82.5%', date: '2023-09-27', colorClass: 'bg-primary/20 text-primary border-primary/30', letter: 'A' },
+            ];
+
+            function renderTable() {
+                const tbody = document.getElementById('lb-tbody');
+                tbody.innerHTML = players.map(p => {
+                    if (p.isMe) {
+                        return `<tr class="bg-primary/10 border-l-4 border-l-primary hover:bg-primary/20 transition-colors shadow-[inset_0_0_20px_rgba(0,208,255,0.05)]">
+                        <td class="py-2.5 px-5 font-bold text-primary">${p.rank}</td>
+                        <td class="py-2.5 px-5"><div class="flex items-center gap-3">
+                            <div class="w-7 h-7 rounded-full ${p.colorClass} flex items-center justify-center font-sans font-bold text-xs shadow-[0_0_10px_rgba(0,208,255,0.5)]">${p.letter}</div>
+                            <span class="font-sans font-bold text-white tracking-wide">${p.name}</span>
+                            <span class="material-symbols-outlined text-primary text-sm" title="You">person</span>
+                        </div></td>
+                        <td class="py-2.5 px-5 text-right font-bold text-white text-base">${p.wpm}</td>
+                        <td class="py-2.5 px-5 text-right text-white font-medium">${p.acc}</td>
+                        <td class="py-2.5 px-5 text-right text-primary/70 hidden sm:table-cell">${p.date}</td>
+                    </tr>`;
+                    }
+                    return `<tr class="hover:bg-white/5 transition-colors group border-l-4 border-transparent">
+                    <td class="py-2.5 px-5 text-slate-400">${p.rank}</td>
+                    <td class="py-2.5 px-5"><div class="flex items-center gap-3">
+                        <div class="w-7 h-7 rounded-full ${p.colorClass} flex items-center justify-center font-sans font-bold text-xs border border-transparent group-hover:border-white/10 transition-colors">${p.letter}</div>
+                        <span class="font-sans font-medium text-slate-200 group-hover:text-white transition-colors">${p.name}</span>
+                    </div></td>
+                    <td class="py-2.5 px-5 text-right font-bold text-primary/80">${p.wpm}</td>
+                    <td class="py-2.5 px-5 text-right text-slate-300">${p.acc}</td>
+                    <td class="py-2.5 px-5 text-right text-slate-500 hidden sm:table-cell">${p.date}</td>
+                </tr>`;
+                }).join('');
+            }
+            renderTable();
+
+            // Ã¢â€â‚¬Ã¢â€â‚¬ CONFIG BAR Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+            const configBar = document.getElementById('config-bar');
+
+            // Flash-open on page load (matches testpage behaviour)
+            if (configBar) {
+                configBar.classList.add('is-open');
+                setTimeout(() => { configBar.classList.remove('is-open'); }, 2000);
+            }
+
+            function setActive(selector, clickedEl) {
+                document.querySelectorAll(selector).forEach(b => {
+                    b.classList.remove('text-primary', 'font-bold');
+                    b.classList.add('text-slate-400');
+                    b.querySelectorAll('.drop-shadow-\\[0_0_5px_rgba\\(0\\,208\\,255\\,0\\.4\\)\\]').forEach(s => s.classList.remove('drop-shadow-[0_0_5px_rgba(0,208,255,0.4)]'));
+                });
+                clickedEl.classList.add('text-primary', 'font-bold');
+                clickedEl.classList.remove('text-slate-400');
+            }
+            function setScope(v, el) { setActive('.is-scope', el); }
+            function setTime(v, el) { setActive('.is-time', el); }
+            function setDur(v, el) { setActive('.is-dur', el); }
+
+            // Ã¢â€â‚¬Ã¢â€â‚¬ SIDEBAR MENU Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+            const openMenuBtn = document.getElementById('open-menu-btn');
+            const sidebarMenu = document.getElementById('sidebar-menu');
+
+            if (openMenuBtn && sidebarMenu) {
+                openMenuBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    sidebarMenu.classList.remove('-translate-x-full');
+                    sidebarMenu.classList.add('translate-x-0');
+                    openMenuBtn.classList.add('is-active', 'opacity-0', 'pointer-events-none');
+                });
+                sidebarMenu.addEventListener('mouseleave', () => {
+                    sidebarMenu.classList.remove('translate-x-0');
+                    sidebarMenu.classList.add('-translate-x-full');
+                    openMenuBtn.classList.remove('is-active', 'opacity-0', 'pointer-events-none');
+                    openMenuBtn.blur();
+                });
+            }
+
+            // Ã¢â€â‚¬Ã¢â€â‚¬ PAGE-LEVEL CUSTOM SCROLLBAR Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬Ã¢â€â‚¬
+            const pageTrack = document.getElementById('page-scroll-track');
+            const pageThumb = document.getElementById('page-scroll-thumb');
+            let isDragging = false, startY, startScrollTop;
+
+            function updatePageScrollbar() {
+                const docH = document.documentElement.scrollHeight;
+                const winH = window.innerHeight;
+                const scrollable = docH - winH;
+                if (scrollable <= 0) { pageTrack.style.display = 'none'; return; }
+                pageTrack.style.display = 'block';
+                const pct = window.scrollY / scrollable;
+                const trackH = pageTrack.clientHeight;
+                const thumbH = Math.max(trackH * (winH / docH), 40);
+                pageThumb.style.height = thumbH + 'px';
+                pageThumb.style.top = (pct * (trackH - thumbH)) + 'px';
+            }
+
+            // Show on mouse near right edge
+            document.addEventListener('mousemove', e => {
+                if (isDragging || window.innerWidth - e.clientX < 40) {
+                    pageTrack.classList.remove('opacity-0', 'translate-x-4', 'pointer-events-none');
+                    pageTrack.classList.add('opacity-100', 'translate-x-0', 'pointer-events-auto');
+                } else {
+                    pageTrack.classList.add('opacity-0', 'translate-x-4', 'pointer-events-none');
+                    pageTrack.classList.remove('opacity-100', 'translate-x-0', 'pointer-events-auto');
+                }
+            });
+
+            window.addEventListener('scroll', updatePageScrollbar);
+            window.addEventListener('resize', updatePageScrollbar);
+
+            pageThumb.addEventListener('mousedown', e => {
+                isDragging = true;
+                startY = e.clientY;
+                startScrollTop = window.scrollY;
+                document.body.style.userSelect = 'none';
+                pageThumb.classList.add('bg-primary');
+            });
+            document.addEventListener('mousemove', e => {
+                if (!isDragging) return;
+                const docH = document.documentElement.scrollHeight;
+                const winH = window.innerHeight;
+                const maxScroll = docH - winH;
+                const thumbH = pageThumb.clientHeight;
+                const maxThumbTop = pageTrack.clientHeight - thumbH;
+                const deltaY = e.clientY - startY;
+                window.scrollTo(0, startScrollTop + (deltaY / maxThumbTop) * maxScroll);
+            });
+            document.addEventListener('mouseup', () => {
+                if (!isDragging) return;
+                isDragging = false;
+                document.body.style.userSelect = '';
+                pageThumb.classList.remove('bg-primary');
+            });
+
+
+            // Global Spacebar Scroll Prevention
+            window.addEventListener('keydown', (e) => {
+                if (e.key === ' ' || e.key === 'Spacebar') {
+                    const activeEl = document.activeElement;
+                    if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable)) {
+                        return;
+                    }
+                    e.preventDefault();
+                }
+            });
+
+            setTimeout(updatePageScrollbar, 100);
+        });
+    </script>
+
+    <!-- Apply saved settings globally -->
+    <script src="settings.js"></script>
+</body>
+
+</html>
