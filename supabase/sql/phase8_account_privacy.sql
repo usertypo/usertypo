@@ -1,7 +1,7 @@
--- Account data wipe helpers for System & Data settings.
--- reset_my_account_data: keep the profile/Clerk user, delete linked app data.
--- delete_my_account_data: delete profile + all linked app data (Clerk delete is client-side).
--- See also: phase8_account_privacy.sql (live hardening).
+-- Phase 8: complete account reset/delete coverage for privacy.
+-- - reset clears blocks (not only friends/sessions)
+-- - delete explicitly wipes all user-owned rows before profile cascade
+-- - keep grants locked to authenticated (not anon)
 
 create or replace function public.reset_my_account_data()
 returns jsonb
